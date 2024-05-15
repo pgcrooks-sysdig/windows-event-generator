@@ -6,7 +6,10 @@ on:
 
 jobs:
   build-image:
-    runs-on: windows-2022
+    strategy:
+      matrix:
+        os: [2019, 2022]
+    runs-on: windows-${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -16,6 +19,6 @@ jobs:
         env:
           GITHUB_HEAD_REF: ${{ github.head_ref }}
         run: |
-          export IMAGE_TAG=$(echo "${GITHUB_HEAD_REF}" | sed "s/\//-/g")-2022
+          export IMAGE_TAG=$(echo "${GITHUB_HEAD_REF}" | sed "s/\//-/g")-${{ matrix.os }}
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-          docker build -t windows-event-gen:${IMAGE_TAG} -f Dockerfile.2022 .
+          docker build -t windows-event-gen:${IMAGE_TAG} --build-arg SERVER_VERSION=${{ matrix.os }} .
